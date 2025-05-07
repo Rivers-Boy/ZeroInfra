@@ -1,8 +1,8 @@
-package main.java;
+package com.river.code;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class FixedWindowRateLimiter implements RateLimiter{
+public class FixedWindowRateLimiter implements RateLimiter {
 
     /**
      * 窗口时长，毫秒级
@@ -12,7 +12,7 @@ public class FixedWindowRateLimiter implements RateLimiter{
     /**
      * 限流大小
      */
-    private int limit;
+    private final int limit;
 
     /**
      * 窗口开始时间，毫秒级
@@ -22,7 +22,7 @@ public class FixedWindowRateLimiter implements RateLimiter{
     /**
      * 计数器
      */
-    private AtomicInteger counter = new AtomicInteger();
+    private final AtomicInteger counter = new AtomicInteger();
 
     public FixedWindowRateLimiter(long windowSize, int limit) {
         this.windowSize = windowSize;
@@ -38,10 +38,15 @@ public class FixedWindowRateLimiter implements RateLimiter{
     }
 
     /**
-     * 重置窗口
+     * 重置窗口:保证只有一个线程在重置它
+     * 同时进行一个二重检查：因为假设在重置期间来了 n 个请求，第一个执行成功之后，后面如果不检查，会重置 n 次
      */
-    private void reset() {
+    private synchronized void reset() {
+        if (checkWindowIfValid()) {
+            return;
+        }
         // 起始时间和计数器清零
+        System.out.println("窗口重置");
         windowStartTime = System.currentTimeMillis();
         counter.set(0);
     }

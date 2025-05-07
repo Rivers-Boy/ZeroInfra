@@ -1,4 +1,4 @@
-package main.java;
+package com.river.code;
 
 public interface RateLimiter {
 
