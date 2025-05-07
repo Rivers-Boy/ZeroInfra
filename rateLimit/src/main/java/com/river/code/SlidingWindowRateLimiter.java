@@ -80,7 +80,7 @@ public class SlidingWindowRateLimiter implements RateLimiter {
         if (!window.containsKey(curBucket)) {
             refresh(curBucket);
         }
-        // 尝试从滑动窗口获取元素
+        // 尝试从滑动窗口获取元素，知道成功或者线程中断；如果是拒绝策略，不用此循环，只需要 cas 尝试一次即可，失败直接退出
         while (!Thread.interrupted()) {
             int curTotal = total.get();
             if (curTotal + 1 > limit) {
